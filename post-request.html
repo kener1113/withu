@@ -131,7 +131,7 @@
         <input type="date" id="serviceDate">
       </div>
       <div class="field">
-        <label>服務時間（起）</label>
+        <label>服務時間（起）<span class="req">*</span></label>
         <input type="time" id="serviceTime">
       </div>
       <div class="field">
@@ -194,6 +194,14 @@
       const today = new Date();
       const t = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
       return v < t ? "服務日期不能早於今天" : "";
+    }],
+    ["serviceTime", v => {
+      if (!v) return "請選擇服務開始的時間";
+      // 選今天的話，時間不能已經過了
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const nowTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      return document.getElementById("serviceDate").value === today && v < nowTime ? "這個時間已經過了，請選擇之後的時間" : "";
     }],
     ["fromAddr", v => v ? "" : "請填寫出發地點（到府接送的地址）"],
     ["toAddr", v => v ? "" : "請填寫目的地名稱與地址"],
