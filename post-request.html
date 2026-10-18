@@ -66,6 +66,14 @@
   .disclaimer {
     font-size: 12px; color: var(--muted); text-align:center; margin-top: 14px; line-height: 1.6;
   }
+  .req { color: #C0502A; margin-left: 2px; }
+  .req-note { font-size: 13px; color: var(--muted); margin: -12px 0 16px; }
+  .field.error input { border-color: #C0502A; background: #FFF6F2; }
+  .err-msg { font-size: 13px; color: #A14A22; margin-top: 5px; font-weight: 600; }
+  .submit-error {
+    display: none; background: #FFF6F2; border: 1px solid #F3C9B3; color: #A14A22;
+    border-radius: 10px; padding: 10px 12px; font-size: 14px; font-weight: 600; margin-top: 10px; text-align: center;
+  }
 </style>
 </head>
 <body>
@@ -74,8 +82,9 @@
   <div class="brand">伴程 WithU</div>
   <h1>刊登需求</h1>
   <div class="lead">填好基本資訊，平台會從陪送員中篩選並推薦 1–3 位人選給您。</div>
+  <div class="req-note">標示 <span class="req">*</span> 的欄位為必填</div>
 
-  <form id="requestForm">
+  <form id="requestForm" novalidate>
 
     <div class="section">
       <div class="section-title">長輩資訊</div>
@@ -100,7 +109,7 @@
         <textarea id="healthNote" placeholder="慢性病、過敏、行動限制等需要注意的事項"></textarea>
       </div>
       <div class="field">
-        <label>緊急聯絡人電話（服務期間需保持暢通）</label>
+        <label>緊急聯絡人電話（服務期間需保持暢通）<span class="req">*</span></label>
         <input type="text" id="emergencyPhone" placeholder="09XX-XXX-XXX">
       </div>
     </div>
@@ -118,7 +127,7 @@
         </div>
       </div>
       <div class="field">
-        <label>服務日期</label>
+        <label>服務日期<span class="req">*</span></label>
         <input type="date" id="serviceDate">
       </div>
       <div class="field">
@@ -133,11 +142,11 @@
         </div>
       </div>
       <div class="field">
-        <label>出發地點（到府接送地址）</label>
+        <label>出發地點（到府接送地址）<span class="req">*</span></label>
         <input type="text" id="fromAddr" placeholder="例如：文山區○○路○○號">
       </div>
       <div class="field">
-        <label>目的地名稱與地址</label>
+        <label>目的地名稱與地址<span class="req">*</span></label>
         <input type="text" id="toAddr" placeholder="例如：萬芳醫院">
       </div>
       <div class="field">
@@ -147,6 +156,7 @@
     </div>
 
     <button type="submit" class="submit-btn">送出需求</button>
+    <div class="submit-error" id="submitError"></div>
     <div class="disclaimer">
       送出後會開啟 LINE 聊天室帶入摘要，平台人員將為您篩選並推薦 1–3 位陪送員。<br>
       試營運期間陪同服務免費，平台不會要求付款，也不代為收受或代墊金錢。
@@ -173,8 +183,60 @@
     return group.querySelector(".selected").dataset.value;
   }
 
+  // 必填欄位檢查：回傳錯誤訊息，沒問題回傳空字串（順序與頁面由上到下一致，才會捲到第一個錯誤）
+  const RULES = [
+    ["emergencyPhone", v => {
+      if (!v) return "請填寫緊急聯絡人電話";
+      return v.replace(/\D/g, "").length < 8 ? "電話號碼好像不完整，請再確認一次" : "";
+    }],
+    ["serviceDate", v => {
+      if (!v) return "請選擇服務日期";
+      const today = new Date();
+      const t = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      return v < t ? "服務日期不能早於今天" : "";
+    }],
+    ["fromAddr", v => v ? "" : "請填寫出發地點（到府接送的地址）"],
+    ["toAddr", v => v ? "" : "請填寫目的地名稱與地址"],
+  ];
+
+  function showError(id, msg) {
+    const field = document.getElementById(id).closest(".field");
+    let el = field.querySelector(".err-msg");
+    field.classList.toggle("error", !!msg);
+    if (!msg) { if (el) el.remove(); return; }
+    if (!el) { el = document.createElement("div"); el.className = "err-msg"; field.appendChild(el); }
+    el.textContent = msg;
+  }
+
+  function validate() {
+    let first = null, count = 0;
+    for (const [id, check] of RULES) {
+      const msg = check(document.getElementById(id).value.trim());
+      showError(id, msg);
+      if (msg) { count++; if (!first) first = id; }
+    }
+    const box = document.getElementById("submitError");
+    box.style.display = count ? "block" : "none";
+    box.textContent = count ? `還有 ${count} 個必填欄位需要確認，請看上方紅色提示` : "";
+    if (first) {
+      const el = document.getElementById(first);
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.focus({ preventScroll: true });
+    }
+    return count === 0;
+  }
+
+  // 使用者修正後，即時拿掉該欄位的紅色提示
+  RULES.forEach(([id, check]) => {
+    const el = document.getElementById(id);
+    ["input", "change"].forEach(evt => el.addEventListener(evt, () => {
+      if (el.closest(".field").classList.contains("error")) showError(id, check(el.value.trim()));
+    }));
+  });
+
   document.getElementById("requestForm").addEventListener("submit", function (e) {
     e.preventDefault();
+    if (!validate()) return;
 
     const mobility = getSelected("mobility");
     const dementia = getSelected("dementia");
