@@ -185,13 +185,19 @@
     const from = document.getElementById("fromAddr").value || "未填";
     const to = document.getElementById("toAddr").value || "未填";
     const phone = document.getElementById("emergencyPhone").value || "未填";
+    // 備註可能有換行，壓成一行才不會打亂摘要格式
+    const oneLine = id => document.getElementById(id).value.trim().replace(/\s*\n+\s*/g, "；");
+    const healthNote = oneLine("healthNote");
+    const otherNote = oneLine("otherNote");
 
     const summary =
       `刊登需求：${serviceType}\n` +
       `日期時間：${date} ${time}（約 ${duration}）\n` +
       `出發：${from}\n目的地：${to}\n` +
       `長輩行動能力：${mobility}，失智情形：${dementia}\n` +
-      `緊急聯絡電話：${phone}`;
+      `緊急聯絡電話：${phone}` +
+      (healthNote ? `\n健康狀況備註：${healthNote}` : "") +
+      (otherNote ? `\n其他備註：${otherNote}` : "");
 
     const url = `https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(summary)}`;
     window.open(url, "_blank");
