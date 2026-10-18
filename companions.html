@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>瀏覽陪送員 - 伴程 WithU</title>
+<style>
+  :root {
+    --teal: #2F6F6A;
+    --teal-light: #E1EDEB;
+    --cta: #E8875B;
+    --sand: #FBF8F3;
+    --dark: #2B2B2B;
+    --muted: #6E6E6A;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    background: var(--sand);
+    padding: 32px 20px;
+  }
+  .header { max-width: 900px; margin: 0 auto 24px; }
+  .brand { font-size: 14px; font-weight: 700; color: var(--teal); letter-spacing: 1px; }
+  h1 { color: var(--dark); font-size: 26px; margin-top: 6px; }
+  .filters { display:flex; gap:10px; margin: 16px 0 24px; flex-wrap: wrap; }
+  .filter-chip {
+    background: #fff; border: 1px solid #ECE6DC; border-radius: 20px;
+    padding: 8px 16px; font-size: 13px; color: var(--muted);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(60,40,30,0.06);
+    position: relative;
+    overflow-wrap: break-word;
+  }
+  .heart {
+    position: absolute; top: 18px; right: 18px;
+    font-size: 20px; color: #ccc; cursor: pointer;
+  }
+  .heart.active { color: var(--cta); }
+  .top-row { display:flex; align-items:center; gap:14px; }
+  .avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--teal); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; flex-shrink: 0;
+  }
+  .name { font-size: 17px; font-weight: 700; color: var(--dark); }
+  .rating { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .rating b { color: var(--cta); }
+  .badges { display:flex; gap:6px; flex-wrap: wrap; margin: 14px 0 10px; }
+  .badge {
+    background: var(--teal-light); color: var(--teal);
+    font-size: 12px; padding: 4px 10px; border-radius: 12px; font-weight: 600;
+  }
+  .lang { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .review {
+    font-size: 13px; color: var(--muted); background: var(--sand);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;
+    font-style: italic;
+  }
+  .book-btn {
+    width: 100%;
+    background: var(--cta);
+    color: var(--dark);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .book-btn:hover { background: #F09A72; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">伴程 WithU</div>
+  <h1>瀏覽陪送員</h1>
+  <div class="filters">
+    <span class="filter-chip">地區：全部</span>
+    <span class="filter-chip">語言：全部</span>
+    <span class="filter-chip">時段：全部</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <span class="heart">♡</span>
+    <div class="top-row">
+      <div class="avatar">A03</div>
+      <div>
+        <div class="name">陳同學</div>
+        <div class="rating">★ <b>4.9</b>（32 次服務）</div>
+      </div>
+    </div>
+    <div class="badges">
+      <span class="badge">✓ 急救證照</span>
+      <span class="badge">✓ 失智友善培訓</span>
+    </div>
+    <div class="lang">語言：國語、台語　陪同方式：陪搭公車、計程車</div>
+    <div class="review">「很細心，會提前到，路上一直留意阿嬤走路的速度。」</div>
+    <button class="book-btn" onclick="bookCompanion('A03', '陳同學')">預約這位</button>
+  </div>
+
+  <div class="card">
+    <span class="heart active">♥</span>
+    <div class="top-row">
+      <div class="avatar">B07</div>
+      <div>
+        <div class="name">林同學</div>
+        <div class="rating">★ <b>5.0</b>（8 次服務）</div>
+      </div>
+    </div>
+    <div class="badges">
+      <span class="badge">✓ 急救證照</span>
+      <span class="badge">✓ 失智友善培訓</span>
+    </div>
+    <div class="lang">語言：國語、客語　陪同方式：陪搭公車、計程車</div>
+    <div class="review">「態度很好，長輩一開始緊張，後來聊得很開心。」</div>
+    <button class="book-btn" onclick="bookCompanion('B07', '林同學')">預約這位</button>
+  </div>
+
+  <div class="card">
+    <span class="heart">♡</span>
+    <div class="top-row">
+      <div class="avatar">C12</div>
+      <div>
+        <div class="name">王同學</div>
+        <div class="rating">★ <b>4.8</b>（20 次服務）</div>
+      </div>
+    </div>
+    <div class="badges">
+      <span class="badge">✓ 急救證照</span>
+      <span class="badge">✓ 失智友善培訓</span>
+    </div>
+    <div class="lang">語言：國語、台語　陪同方式：陪搭公車、計程車</div>
+    <div class="review">「經驗豐富，很會安撫長輩的情緒，推薦！」</div>
+    <button class="book-btn" onclick="bookCompanion('C12', '王同學')">預約這位</button>
+  </div>
+
+</div>
+
+<script>
+  // ↓↓↓ 正式上線時，把這裡換成你申請到的官方帳號 ID（要保留開頭的 @）
+  const LINE_OA_ID = "@your_oa_id";
+
+  function bookCompanion(companionId, name) {
+    const message = `我想預約陪送員 ${companionId}（${name}）`;
+    const url = `https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+  }
+
+  // 收藏（愛心）切換，僅前端示意，正式版要串接帳號系統記錄收藏名單
+  document.querySelectorAll(".heart").forEach(h => {
+    h.addEventListener("click", () => h.classList.toggle("active"));
+    h.textContent = h.classList.contains("active") ? "♥" : "♡";
+  });
+</script>
+
+</body>
+</html>

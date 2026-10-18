@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>刊登需求 - 伴程 WithU</title>
+<style>
+  :root {
+    --teal: #2F6F6A;
+    --teal-light: #E1EDEB;
+    --cta: #E8875B;
+    --sand: #FBF8F3;
+    --dark: #2B2B2B;
+    --muted: #6E6E6A;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    background: var(--sand);
+    padding: 32px 20px;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  .brand { font-size: 14px; font-weight: 700; color: var(--teal); letter-spacing: 1px; }
+  h1 { color: var(--dark); font-size: 26px; margin: 6px 0 4px; }
+  .lead { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+  .section {
+    background: #fff; border-radius: 14px; padding: 22px;
+    margin-bottom: 16px; box-shadow: 0 2px 10px rgba(60,40,30,0.06);
+    overflow-wrap: break-word;
+  }
+  .section-title {
+    font-size: 15px; font-weight: 700; color: var(--teal);
+    margin-bottom: 14px; display:flex; align-items:center; gap:8px;
+  }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display:block; font-size: 13px; color: var(--dark); font-weight: 600; margin-bottom: 6px; }
+  input[type=text], input[type=date], input[type=time], textarea, select {
+    width: 100%; padding: 10px 12px; border: 1px solid #ECE6DC; border-radius: 8px;
+    font-size: 14px; font-family: inherit; color: var(--dark); background: #fff;
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  .radio-group { display:flex; gap: 10px; flex-wrap: wrap; }
+  .radio-chip {
+    border: 1px solid #ECE6DC; border-radius: 20px; padding: 7px 14px;
+    font-size: 13px; cursor: pointer; color: var(--muted); background: #fff;
+  }
+  .radio-chip.selected { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .note {
+    font-size: 12px; color: var(--muted); margin-top: 6px;
+  }
+  .submit-btn {
+    width: 100%;
+    background: var(--cta);
+    color: var(--dark);
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 8px;
+  }
+  .submit-btn:hover { background: #F09A72; }
+  .disclaimer {
+    font-size: 12px; color: var(--muted); text-align:center; margin-top: 14px; line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">伴程 WithU</div>
+  <h1>刊登需求</h1>
+  <div class="lead">填好基本資訊，平台會從陪送員中篩選並推薦 1–3 位人選給您。</div>
+
+  <form id="requestForm">
+
+    <div class="section">
+      <div class="section-title">長輩資訊</div>
+      <div class="field">
+        <label>行動能力</label>
+        <div class="radio-group" data-group="mobility">
+          <span class="radio-chip selected" data-value="可自行走動">可自行走動</span>
+          <span class="radio-chip" data-value="需攙扶">需攙扶</span>
+          <span class="radio-chip" data-value="使用助行器">使用助行器</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>是否有失智情形</label>
+        <div class="radio-group" data-group="dementia">
+          <span class="radio-chip selected" data-value="無">無</span>
+          <span class="radio-chip" data-value="輕度">輕度</span>
+          <span class="radio-chip" data-value="中重度">中重度</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>健康狀況備註（選填）</label>
+        <textarea id="healthNote" placeholder="慢性病、過敏、行動限制等需要注意的事項"></textarea>
+      </div>
+      <div class="field">
+        <label>緊急聯絡人電話（服務期間需保持暢通）</label>
+        <input type="text" id="emergencyPhone" placeholder="09XX-XXX-XXX">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">服務內容</div>
+      <div class="field">
+        <label>服務類型</label>
+        <div class="radio-group" data-group="serviceType">
+          <span class="radio-chip selected" data-value="看診">看診</span>
+          <span class="radio-chip" data-value="洗腎">洗腎</span>
+          <span class="radio-chip" data-value="辦事">辦事</span>
+          <span class="radio-chip" data-value="買東西">買東西</span>
+          <span class="radio-chip" data-value="其他">其他</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>服務日期</label>
+        <input type="date" id="serviceDate">
+      </div>
+      <div class="field">
+        <label>服務時間（起）</label>
+        <input type="time" id="serviceTime">
+      </div>
+      <div class="field">
+        <label>預估服務時數</label>
+        <div class="radio-group" data-group="duration">
+          <span class="radio-chip selected" data-value="2小時">2 小時</span>
+          <span class="radio-chip" data-value="3小時">3 小時</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>出發地點（到府接送地址）</label>
+        <input type="text" id="fromAddr" placeholder="例如：文山區○○路○○號">
+      </div>
+      <div class="field">
+        <label>目的地名稱與地址</label>
+        <input type="text" id="toAddr" placeholder="例如：萬芳醫院">
+      </div>
+      <div class="field">
+        <label>其他備註（選填）</label>
+        <textarea id="otherNote" placeholder="希望條件、特殊需求等"></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">送出需求</button>
+    <div class="disclaimer">
+      送出後會開啟 LINE 聊天室帶入摘要，平台人員將為您篩選並推薦 1–3 位陪送員。<br>
+      試營運期間陪同服務免費，平台不會要求付款，也不代為收受或代墊金錢。
+    </div>
+  </form>
+</div>
+
+<script>
+  // ↓↓↓ 正式上線時，把這裡換成你申請到的官方帳號 ID（要保留開頭的 @）
+  const LINE_OA_ID = "@your_oa_id";
+
+  // 單選晶片的選取邏輯
+  document.querySelectorAll(".radio-group").forEach(group => {
+    group.querySelectorAll(".radio-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        group.querySelectorAll(".radio-chip").forEach(c => c.classList.remove("selected"));
+        chip.classList.add("selected");
+      });
+    });
+  });
+
+  function getSelected(groupName) {
+    const group = document.querySelector(`.radio-group[data-group="${groupName}"]`);
+    return group.querySelector(".selected").dataset.value;
+  }
+
+  document.getElementById("requestForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const mobility = getSelected("mobility");
+    const dementia = getSelected("dementia");
+    const serviceType = getSelected("serviceType");
+    const duration = getSelected("duration");
+    const date = document.getElementById("serviceDate").value || "未填";
+    const time = document.getElementById("serviceTime").value || "未填";
+    const from = document.getElementById("fromAddr").value || "未填";
+    const to = document.getElementById("toAddr").value || "未填";
+    const phone = document.getElementById("emergencyPhone").value || "未填";
+
+    const summary =
+      `刊登需求：${serviceType}\n` +
+      `日期時間：${date} ${time}（約 ${duration}）\n` +
+      `出發：${from}\n目的地：${to}\n` +
+      `長輩行動能力：${mobility}，失智情形：${dementia}\n` +
+      `緊急聯絡電話：${phone}`;
+
+    const url = `https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(summary)}`;
+    window.open(url, "_blank");
+  });
+</script>
+
+</body>
+</html>
