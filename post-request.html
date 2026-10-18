@@ -147,7 +147,7 @@
       </div>
       <div class="field">
         <label>目的地名稱與地址<span class="req">*</span></label>
-        <input type="text" id="toAddr" placeholder="例如：萬芳醫院">
+        <input type="text" id="toAddr" placeholder="例如：萬芳醫院 心臟內科">
       </div>
       <div class="field">
         <label>其他備註（選填）</label>
@@ -183,6 +183,9 @@
     return group.querySelector(".selected").dataset.value;
   }
 
+  // 不算空白的字數（中文、英數字都算一個字）
+  const charCount = s => [...s.replace(/\s/g, "")].length;
+
   // 必填欄位檢查：回傳錯誤訊息，沒問題回傳空字串（順序與頁面由上到下一致，才會捲到第一個錯誤）
   const RULES = [
     ["emergencyPhone", v => {
@@ -203,8 +206,15 @@
       const nowTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       return document.getElementById("serviceDate").value === today && v < nowTime ? "這個時間已經過了，請選擇之後的時間" : "";
     }],
-    ["fromAddr", v => v ? "" : "請填寫出發地點（到府接送的地址）"],
-    ["toAddr", v => v ? "" : "請填寫目的地名稱與地址"],
+    ["fromAddr", v => {
+      if (!v) return "請填寫出發地點（到府接送的地址）";
+      return charCount(v) < 5 ? "請填寫完整的地址（包含路名與門牌號碼）" : "";
+    }],
+    // 目的地只要求 4 個字，「萬芳醫院」「台大醫院」這類名稱才不會被擋
+    ["toAddr", v => {
+      if (!v) return "請填寫目的地名稱與地址";
+      return charCount(v) < 4 ? "請填寫完整的目的地名稱（例如：萬芳醫院 心臟內科）" : "";
+    }],
   ];
 
   function showError(id, msg) {
