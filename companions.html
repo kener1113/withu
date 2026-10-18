@@ -81,6 +81,25 @@
     font-family: inherit;
   }
   .book-btn:hover { background: #F09A72; }
+  .book-btn:disabled {
+    background: #ECE6DC; color: var(--muted); cursor: not-allowed;
+  }
+  .notice {
+    background: #FBE8DE; border: 1px solid #F3C9B3; border-radius: 14px;
+    padding: 16px 18px; margin: 4px 0 20px; color: var(--dark);
+    font-size: 15px; line-height: 1.7;
+  }
+  .notice b { color: #8A4426; }
+  .notice a {
+    display: inline-block; margin-top: 10px;
+    background: var(--teal); color: #fff; text-decoration: none;
+    border-radius: 10px; padding: 9px 16px; font-weight: 700; font-size: 15px;
+  }
+  .demo-tag {
+    display: inline-block; margin-left: 6px; vertical-align: middle;
+    background: #ECE6DC; color: var(--muted);
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  }
 </style>
 </head>
 <body>
@@ -88,6 +107,11 @@
 <div class="header">
   <div class="brand">伴程 WithU</div>
   <h1>瀏覽陪送員</h1>
+  <div class="notice">
+    <b>示意畫面：</b>以下陪送員為介面示意，並非真實人員。陪送員目前正在招募與審核中，正式上線後會在這裡顯示經過認證的陪送員。<br>
+    現在有陪同需求，請直接刊登，平台會為您媒合。<br>
+    <a href="post-request.html">刊登需求</a>
+  </div>
   <div class="filters">
     <span class="filter-chip">地區：全部</span>
     <span class="filter-chip">語言：全部</span>
@@ -100,10 +124,9 @@
   <div class="card">
     <span class="heart">♡</span>
     <div class="top-row">
-      <div class="avatar">A03</div>
+      <div class="avatar">A</div>
       <div>
-        <div class="name">陳同學</div>
-        <div class="rating">★ <b>4.9</b>（32 次服務）</div>
+        <div class="name">陪送員 A<span class="demo-tag">示意</span></div>
       </div>
     </div>
     <div class="badges">
@@ -111,17 +134,15 @@
       <span class="badge">✓ 失智友善培訓</span>
     </div>
     <div class="lang">語言：國語、台語　陪同方式：陪搭公車、計程車</div>
-    <div class="review">「很細心，會提前到，路上一直留意阿嬤走路的速度。」</div>
-    <button class="book-btn" onclick="bookCompanion('A03', '陳同學')">預約這位</button>
+    <button class="book-btn" disabled>示意畫面，暫不開放預約</button>
   </div>
 
   <div class="card">
     <span class="heart active">♥</span>
     <div class="top-row">
-      <div class="avatar">B07</div>
+      <div class="avatar">B</div>
       <div>
-        <div class="name">林同學</div>
-        <div class="rating">★ <b>5.0</b>（8 次服務）</div>
+        <div class="name">陪送員 B<span class="demo-tag">示意</span></div>
       </div>
     </div>
     <div class="badges">
@@ -129,17 +150,15 @@
       <span class="badge">✓ 失智友善培訓</span>
     </div>
     <div class="lang">語言：國語、客語　陪同方式：陪搭公車、計程車</div>
-    <div class="review">「態度很好，長輩一開始緊張，後來聊得很開心。」</div>
-    <button class="book-btn" onclick="bookCompanion('B07', '林同學')">預約這位</button>
+    <button class="book-btn" disabled>示意畫面，暫不開放預約</button>
   </div>
 
   <div class="card">
     <span class="heart">♡</span>
     <div class="top-row">
-      <div class="avatar">C12</div>
+      <div class="avatar">C</div>
       <div>
-        <div class="name">王同學</div>
-        <div class="rating">★ <b>4.8</b>（20 次服務）</div>
+        <div class="name">陪送員 C<span class="demo-tag">示意</span></div>
       </div>
     </div>
     <div class="badges">
@@ -147,8 +166,7 @@
       <span class="badge">✓ 失智友善培訓</span>
     </div>
     <div class="lang">語言：國語、台語　陪同方式：陪搭公車、計程車</div>
-    <div class="review">「經驗豐富，很會安撫長輩的情緒，推薦！」</div>
-    <button class="book-btn" onclick="bookCompanion('C12', '王同學')">預約這位</button>
+    <button class="book-btn" disabled>示意畫面，暫不開放預約</button>
   </div>
 
 </div>
@@ -157,11 +175,6 @@
   // ↓↓↓ 正式上線時，把這裡換成你申請到的官方帳號 ID（要保留開頭的 @）
   const LINE_OA_ID = "@370cwhmh";
 
-  function bookCompanion(companionId, name) {
-    const message = `我想預約陪送員 ${companionId}（${name}）`;
-    const url = `https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
-  }
 
   // 收藏（愛心）切換，僅前端示意，正式版要串接帳號系統記錄收藏名單
   document.querySelectorAll(".heart").forEach(h => {
