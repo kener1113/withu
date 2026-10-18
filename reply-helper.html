@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>回覆產生器 - 伴程 WithU 工作人員用</title>
+<style>
+  :root {
+    --teal: #2F6F6A;
+    --teal-light: #E1EDEB;
+    --orange: #E8875B;
+    --orange-light: #FBE8DE;
+    --cream: #FBF8F3;
+    --dark: #2B2B2B;
+    --muted: #6E6E6A;
+    --border: #ECE6DC;
+    --warn: #FFF1B8;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    background: var(--cream); color: var(--dark);
+    padding: 28px 16px 48px; font-size: 16px; line-height: 1.6;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  .brand { font-size: 14px; font-weight: 700; color: var(--teal); letter-spacing: 1px; }
+  h1 { font-size: 26px; margin: 4px 0 4px; }
+  .intro { color: var(--muted); font-size: 15px; margin-bottom: 22px; }
+  .layout { display:grid; grid-template-columns: 400px 1fr; gap: 22px; align-items: start; }
+  .panel {
+    background:#fff; border-radius: 16px; padding: 20px;
+    box-shadow: 0 2px 10px rgba(60,40,30,0.06);
+  }
+  .panel h2 { font-size: 17px; color: var(--teal); margin-bottom: 10px; }
+  .step { display:inline-flex; width: 24px; height: 24px; border-radius: 50%; background: var(--teal); color:#fff;
+    font-size: 13px; align-items:center; justify-content:center; margin-right: 6px; }
+  textarea, input {
+    width: 100%; border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; font-size: 15px; font-family: inherit; color: var(--dark); background: #fff;
+  }
+  textarea { min-height: 170px; resize: vertical; }
+  textarea:focus, input:focus { outline: 2px solid var(--teal); border-color: transparent; }
+  .row { display:flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .btn {
+    border: none; border-radius: 10px; padding: 9px 14px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+  }
+  .btn-teal { background: var(--teal); color: #fff; }
+  .btn-ghost { background: var(--cream); color: var(--muted); border: 1px solid var(--border); }
+  .parsed { margin-top: 14px; font-size: 14px; border-top: 1px dashed var(--border); padding-top: 12px; }
+  .parsed div { display:flex; gap: 8px; padding: 3px 0; }
+  .parsed span:first-child { color: var(--muted); width: 92px; flex-shrink: 0; }
+  .missing { color: #A14A22; font-weight: 700; }
+  .field { margin-top: 12px; }
+  .field label { display:block; font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+  .field small { color: var(--muted); font-weight: 400; }
+  .group-title { font-size: 15px; font-weight: 700; margin: 6px 0 10px; color: var(--muted); }
+  .tpl { background:#fff; border-radius: 16px; padding: 16px 18px; margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(60,40,30,0.06); }
+  .tpl-head { display:flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .tpl-head b { font-size: 15px; }
+  .tpl-head .who { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+  .tpl pre {
+    white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: 15px;
+    background: var(--cream); border-radius: 10px; padding: 12px 14px; line-height: 1.7;
+  }
+  .ph { background: var(--warn); border-radius: 4px; padding: 0 2px; }
+  .hint { font-size: 13px; color: #8A6A00; margin-top: 6px; }
+  .copy { background: var(--orange); color: var(--dark); }
+  .copy.done { background: var(--teal); color: #fff; }
+  .hidden { display: none; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">伴程 WithU｜工作人員用</div>
+  <h1>回覆產生器</h1>
+  <p class="intro">把家屬從「刊登需求」送來的訊息貼在左邊，右邊會自動產生填好資料的回覆範本。黃色【 】是還要手動填寫的地方。所有資料只在這個瀏覽器裡處理，不會上傳。</p>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2><span class="step">1</span>貼上家屬的需求訊息</h2>
+        <textarea id="raw" placeholder="刊登需求：看診&#10;日期時間：2026-10-25 09:30（約 2小時）&#10;出發：…&#10;目的地：…"></textarea>
+        <div class="row">
+          <button class="btn btn-ghost" id="sample">放入範例</button>
+          <button class="btn btn-ghost" id="clear">全部清除</button>
+        </div>
+        <div class="parsed" id="parsed"></div>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <h2><span class="step">2</span>補充由你們決定的資料</h2>
+        <div class="field"><label>長輩稱呼 <small>例如：陳奶奶</small></label><input id="elder"></div>
+        <div class="field"><label>預計回覆媒合結果的時間 <small>例如：今天晚上 8 點前</small></label><input id="deadline"></div>
+        <div class="field"><label>陪送員姓名 <small>例如：林</small></label><input id="cname"></div>
+        <div class="field"><label>陪送員學校科系 <small>例如：政大資管系</small></label><input id="cschool"></div>
+        <div class="field"><label>視訊希望在哪天前完成 <small>例如：10/23（四）</small></label><input id="videoBy"></div>
+        <div class="field"><label>工作人員姓名</label><input id="staff"></div>
+        <div class="field"><label>服務當天群組邀請連結</label><input id="groupLink"></div>
+      </div>
+    </div>
+
+    <div id="out"></div>
+  </div>
+</div>
+
+<script>
+  const SAMPLE = [
+    "刊登需求：看診",
+    "日期時間：2026-10-25 09:30（約 2小時）",
+    "出發：文山區○○路○○號",
+    "目的地：萬芳醫院",
+    "長輩行動能力：需攙扶，失智情形：無",
+    "緊急聯絡電話：未填"
+  ].join("\n");
+
+  const $ = id => document.getElementById(id);
+  const WEEK = "日一二三四五六";
+
+  // 解析「刊登需求」頁送出的摘要；欄位順序不拘，認不得的行會略過
+  function parse(text) {
+    const pick = re => { const m = text.match(re); return m ? m[1].trim() : ""; };
+    const d = {
+      service: pick(/刊登需求[：:]\s*(.+)/),
+      date: "", time: "", duration: "",
+      from: pick(/出發[：:]\s*(.+)/),
+      to: pick(/目的地[：:]\s*(.+)/),
+      mobility: pick(/行動能力[：:]\s*([^，,\n]+)/),
+      dementia: pick(/失智情形[：:]\s*([^\n]+)/),
+      phone: pick(/緊急聯絡電話[：:]\s*(.+)/),
+      health: pick(/健康狀況(?:備註)?[：:]\s*(.+)/),
+      note: pick(/其他備註[：:]\s*(.+)/),
+    };
+    const dt = text.match(/日期時間[：:]\s*(\S+)\s+(\S+?)(?:（約\s*(.+?)）)?\s*$/m);
+    if (dt) { d.date = dt[1]; d.time = dt[2]; d.duration = (dt[3] || "").replace(/\s+/g, ""); }
+    for (const k in d) if (d[k] === "未填") d[k] = "";
+    return d;
+  }
+
+  function prettyDate(s) {
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return s;
+    const dt = new Date(+m[1], +m[2] - 1, +m[3]);
+    return `${+m[2]}/${+m[3]}（${WEEK[dt.getDay()]}）`;
+  }
+
+  // 有值就用值，沒有就留下【標籤】讓工作人員手動補
+  const v = (val, label) => val ? val : `【${label}】`;
+
+  function templates(d, x) {
+    const date = v(prettyDate(d.date), "日期");
+    const time = v(d.time, "時間");
+    const dur = d.duration ? `（約 ${d.duration}）` : "";
+    const elder = v(x.elder, "長輩稱呼");
+    const cname = x.cname ? `${x.cname}同學` : "【陪送員姓名】同學";
+    const to = v(d.to, "目的地");
+    const healthLine = d.health ? `\n📝 健康注意事項：${d.health}` : "";
+    const noteLine = d.note ? `\n🗒️ 其他備註：${d.note}` : "";
+
+    const missing = [];
+    if (!d.date) missing.push("服務日期");
+    if (!d.time) missing.push("服務時間");
+    if (!d.from) missing.push("出發地址（請提供完整的門牌號碼）");
+    if (!d.to) missing.push("目的地名稱與地址");
+    if (!d.phone) missing.push("緊急聯絡人的電話");
+    if (d.service === "看診") {
+      // 目的地已寫出科別（如「心臟內科」）就只問掛號
+      missing.push(/科/.test(d.to) ? "是否已經掛號（如有掛號單，可以拍照給我們）" : "看診的科別，以及是否已經掛號");
+    }
+
+    const list = [];
+    list.push({ group: "步驟 1：確認需求" });
+    list.push({ id: "1-1", title: "收到需求，先回覆確認", who: "給家屬", text:
+`您好，已收到您的陪同需求，謝謝您的信任 🙏
+
+跟您確認這次的資訊：
+🩺 服務類型：${v(d.service, "服務類型")}
+📅 日期時間：${date} ${time}${dur}
+📍 出發地址：${v(d.from, "出發地址")}
+🏥 目的地：${to}
+👵 長輩狀況：${v(d.mobility, "行動能力")}，失智情形：${v(d.dementia, "失智情形")}${healthLine}${noteLine}
+
+如果有需要修改的地方，請直接回覆告訴我們。
+我們會在${v(x.deadline, "回覆時間")}為您媒合陪送員，再跟您聯絡 😊` });
+
+    list.push({ id: "1-2", title: "請家屬補充資料", who: "給家屬", text:
+`您好，已收到您的陪同需求 🙏
+為了安排最合適的陪送員，想再跟您確認幾項資訊：
+
+${missing.map(m => "📌 " + m).join("\n")}
+
+麻煩您直接回覆在這裡，謝謝您！😊` });
+
+    list.push({ id: "1-3", title: "詢問長輩的稱呼與習慣", who: "給家屬，可跟 1-1 一起傳", text:
+`另外想請問，為了讓長輩更自在：
+🙂 長輩希望我們怎麼稱呼他？（例如：陳奶奶、王伯伯）
+🗣️ 平常習慣說國語、台語或客語？
+📝 有沒有需要特別注意的習慣？（例如：容易緊張、走路要扶、怕吵）` });
+
+    list.push({ group: "步驟 2：媒合陪送員" });
+    list.push({ id: "2-1", title: "媒合成功，通知家屬並約視訊", who: "給家屬", text:
+`好消息！已經為${elder}媒合到陪送員 😊
+
+👤 ${cname}（${v(x.cschool, "學校科系")}）
+✅ 紅十字會急救證照
+✅ 失智友善培訓
+
+為了讓長輩安心，想約一個時間，讓陪送員、您和長輩三方視訊約 10 分鐘，先認識一下 🤝
+請問${v(x.videoBy, "日期")}前，哪個時段比較方便呢？` });
+
+    list.push({ id: "2-2", title: "暫時沒有陪送員可以安排", who: "給家屬", text:
+`您好，非常抱歉 🙏
+${date} ${time} 目前暫時沒有可以安排的陪送員。
+
+想請問您：
+📅 時間上是否可以調整？例如【其他可行的時段】
+🔔 或是我們先為您保留需求，一有陪送員可以安排就立刻通知您
+
+造成您的不便很抱歉，謝謝您的耐心等候。` });
+
+    list.push({ group: "步驟 3：事前準備" });
+    list.push({ id: "3-2", title: "邀請加入服務當天的群組", who: "給家屬", text:
+`為了讓您在服務當天隨時掌握${elder}的狀況，我們建立了一個 LINE 群組 👥
+成員有：您、陪送員${cname}，以及伴程的工作人員${v(x.staff, "工作人員姓名")}。
+
+當天陪送員會在群組裡：
+📸 接到長輩時拍照回報
+📍 分享即時位置
+🏥 回報報到、候診、看診的進度
+🏠 送長輩到家後拍照確認平安
+
+服務結束後，我們會退出群組。請點以下連結加入：
+${v(x.groupLink, "群組邀請連結")}` });
+
+    list.push({ id: "3-3", title: "服務前一天提醒", who: "傳到群組", text:
+`提醒您，明天的陪同服務資訊如下 😊
+
+📅 ${date} ${time}
+📍 碰面地點：${v(d.from, "碰面地點")}
+🏥 目的地：${to}
+👤 陪送員：${cname}
+
+🎒 請幫${elder}準備：
+・健保卡
+・掛號單或預約單（如有）
+・平常吃的藥或藥袋（如有需要）
+
+如果有任何變動，請隨時在群組告訴我們。` });
+
+    list.push({ group: "步驟 4：服務當天（陪送員在群組傳）" });
+    list.push({ id: "4-1", title: "出發前", who: "陪送員", text:
+`早安！我是陪送員${x.cname || "【姓名】"}，預計${time}到達門口，到了會再通知您 😊` });
+    list.push({ id: "4-2", title: "接到長輩（附照片）", who: "陪送員", text:
+`📸 已經接到${elder}了，準備出發囉！
+【交通方式，例如：搭 xx 號公車】，預計【時間】到達${to}。` });
+    list.push({ id: "4-4", title: "到達並報到", who: "陪送員", text:
+`🏥 已經到達${to}，完成報到了！
+目前看診號碼是【號碼】，我們是【號碼】號，${elder}正在候診，精神不錯 😊` });
+    list.push({ id: "4-6", title: "平安到家（附照片）", who: "陪送員", text:
+`🏠 已經平安送${elder}回到家，也確認他進門了 📸
+今天的陪同到這裡結束，謝謝您的信任！
+晚一點工作人員會跟您收一下這次的回饋 🙏` });
+
+    list.push({ group: "步驟 5 與其他" });
+    list.push({ id: "5-1", title: "請家屬評分", who: "給家屬，服務當天晚上", text:
+`您好，謝謝您今天使用伴程 WithU 🙏
+想請您花 1 分鐘，為這次的陪同評分（1～5 分）：
+
+⏰ 守時：
+😊 態度：
+✅ 完成度：
+
+也歡迎留下任何建議，或想對陪送員說的話 💬
+您的回饋會幫助我們做得更好！` });
+    list.push({ id: "6-2", title: "家屬要取消", who: "給家屬", text:
+`已為您取消 ${date} ${time} 的陪同服務 ✅
+試營運期間不會收取任何費用。
+之後如果有需要，歡迎隨時在這裡刊登需求 😊` });
+
+    return { list, missing };
+  }
+
+  const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+  function render() {
+    const raw = $("raw").value;
+    const d = parse(raw);
+    const x = {};
+    ["elder", "deadline", "cname", "cschool", "videoBy", "staff", "groupLink"].forEach(k => x[k] = $(k).value.trim());
+
+    const rows = [
+      ["服務類型", d.service], ["日期", prettyDate(d.date)], ["時間", d.time], ["時數", d.duration],
+      ["出發", d.from], ["目的地", d.to], ["行動能力", d.mobility], ["失智情形", d.dementia],
+      ["緊急電話", d.phone], ["健康狀況", d.health], ["其他備註", d.note],
+    ];
+    $("parsed").innerHTML = raw.trim()
+      ? "<b style='font-size:14px'>解析結果</b>" + rows.map(([k, val]) =>
+          `<div><span>${k}</span><span class="${val ? "" : "missing"}">${val ? esc(val) : "未填"}</span></div>`).join("")
+      : "";
+
+    const { list, missing } = templates(d, x);
+    let html = "";
+    for (const t of list) {
+      if (t.group) { html += `<div class="group-title">${t.group}</div>`; continue; }
+      // 資料都齊全時不需要 1-2
+      if (t.id === "1-2" && (!raw.trim() || missing.length === 0)) continue;
+      const left = (t.text.match(/【[^】]*】/g) || []).length;
+      const body = esc(t.text).replace(/【[^】]*】/g, m => `<span class="ph">${m}</span>`);
+      html += `<div class="tpl">
+        <div class="tpl-head"><b>【${t.id}】${t.title}<span class="who">${t.who}</span></b>
+        <button class="btn copy" data-id="${t.id}">複製</button></div>
+        <pre id="tpl-${t.id}">${body}</pre>
+        ${left ? `<div class="hint">還有 ${left} 處黃色【 】要手動填寫，複製後記得修改</div>` : ""}
+      </div>`;
+    }
+    $("out").innerHTML = html;
+    $("out").querySelectorAll(".copy").forEach(b => b.addEventListener("click", () => copy(b)));
+  }
+
+  async function copy(btn) {
+    const text = $("tpl-" + btn.dataset.id).innerText;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      // 舊瀏覽器沒有 clipboard API 時改用選取複製
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); ta.remove();
+    }
+    btn.textContent = "已複製 ✓"; btn.classList.add("done");
+    setTimeout(() => { btn.textContent = "複製"; btn.classList.remove("done"); }, 1500);
+  }
+
+  document.querySelectorAll("textarea, input").forEach(el => el.addEventListener("input", render));
+  $("sample").addEventListener("click", () => { $("raw").value = SAMPLE; render(); });
+  $("clear").addEventListener("click", () => {
+    document.querySelectorAll("textarea, input").forEach(el => el.value = "");
+    render();
+  });
+  render();
+</script>
+</body>
+</html>
