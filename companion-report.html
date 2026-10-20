@@ -96,7 +96,7 @@
 
   const v = id => $(id).value.trim();
   const elder = () => v("elder") || "長輩";
-  const me = () => v("cname") ? "陪送員" + v("cname") : "陪送員";
+  const me = () => v("cname") ? "陪送員" + v("cname") + (/同學$/.test(v("cname")) ? "" : "同學") : "陪送員";
   const dest = () => v("dest") || "目的地";
   const opt = (label, text) => text ? `\n${label}${text}` : "";
 
