@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>選擇視訊時段 - 伴程 WithU</title>
+<style>
+  :root {
+    --teal: #2F6F6A;
+    --teal-light: #E1EDEB;
+    --cta: #E8875B;
+    --sand: #FBF8F3;
+    --dark: #2B2B2B;
+    --muted: #6E6E6A;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    background: var(--sand);
+    padding: 32px 20px;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  .brand { font-size: 14px; font-weight: 700; color: var(--teal); letter-spacing: 1px; }
+  h1 { color: var(--dark); font-size: 26px; margin: 6px 0 4px; }
+  .lead { color: var(--muted); font-size: 14px; margin-bottom: 20px; line-height: 1.7; }
+  .section {
+    background: #fff; border-radius: 14px; padding: 18px 20px;
+    margin-bottom: 14px; box-shadow: 0 2px 10px rgba(60,40,30,0.06);
+  }
+  .day { font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
+  .chip-group { display:flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid #ECE6DC; border-radius: 20px; padding: 8px 14px;
+    font-size: 14px; cursor: pointer; color: var(--muted); background: #fff; user-select: none;
+  }
+  .chip.selected { background: var(--teal); color: #fff; border-color: var(--teal); }
+  label { display:block; font-size: 14px; color: var(--dark); font-weight: 600; margin-bottom: 8px; }
+  .hint { font-weight: 400; color: var(--muted); font-size: 12px; }
+  textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid #ECE6DC; border-radius: 8px;
+    font-size: 15px; font-family: inherit; color: var(--dark); background: #fff; resize: vertical; min-height: 60px;
+  }
+  .count { position: sticky; top: 0; z-index: 2; background: var(--teal-light); color: var(--teal); font-weight: 700;
+    border-radius: 10px; padding: 9px 14px; font-size: 14px; margin-bottom: 14px; }
+  .submit-btn {
+    width: 100%; background: var(--cta); color: var(--dark); border: none; border-radius: 10px;
+    padding: 15px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 6px;
+  }
+  .submit-btn:hover { background: #F09A72; }
+  .submit-error {
+    display: none; background: #FFF6F2; border: 1px solid #F3C9B3; color: #A14A22;
+    border-radius: 10px; padding: 10px 12px; font-size: 14px; font-weight: 600; margin-top: 10px; text-align: center;
+  }
+  .disclaimer { font-size: 12px; color: var(--muted); text-align:center; margin-top: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">伴程 WithU</div>
+  <h1>選擇視訊時段</h1>
+  <div class="lead">為了讓長輩安心，我們會安排陪送員、您和長輩三方視訊約 10 分鐘，先認識一下。<br>請勾選您<b>方便的時段</b>（建議至少選 2 個），我們確認陪送員的時間後，會再通知您確切的視訊時間。</div>
+
+  <div class="count" id="count">已選 0 個時段</div>
+  <div id="days"></div>
+
+  <div class="section">
+    <label for="note">其他說明（選填）<span class="hint">例如：只能用 LINE 視訊、長輩晚上比較有精神</span></label>
+    <textarea id="note"></textarea>
+  </div>
+
+  <button type="button" class="submit-btn" id="submit">送出方便的時段</button>
+  <div class="submit-error" id="submitError">請至少勾選 1 個方便的時段</div>
+  <div class="disclaimer">按下送出後會開啟 LINE，請在 LINE 裡按「傳送」，我們才會收到。</div>
+</div>
+
+<script>
+  const LINE_OA_ID = "@370cwhmh";
+  const WEEK = "日一二三四五六";
+  const SLOTS = ["上午 9–12 點", "下午 1–5 點", "晚上 6–9 點"];
+  const DAYS_AHEAD = 7;
+  const $ = id => document.getElementById(id);
+
+  // 從明天開始列出 7 天，每天 3 個時段
+  const today = new Date();
+  for (let i = 1; i <= DAYS_AHEAD; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+    const label = `${d.getMonth() + 1}/${d.getDate()}（${WEEK[d.getDay()]}）`;
+    const sec = document.createElement("div");
+    sec.className = "section";
+    sec.innerHTML = `<div class="day">${label}</div><div class="chip-group">` +
+      SLOTS.map(s => `<span class="chip" data-value="${label} ${s}">${s}</span>`).join("") + "</div>";
+    $("days").appendChild(sec);
+  }
+
+  const selected = () => [...document.querySelectorAll(".chip.selected")].map(c => c.dataset.value);
+  function refresh() {
+    const n = selected().length;
+    $("count").textContent = `已選 ${n} 個時段` + (n === 1 ? "（建議再多選 1 個）" : "");
+    if (n) $("submitError").style.display = "none";
+  }
+  document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { c.classList.toggle("selected"); refresh(); }));
+
+  $("submit").addEventListener("click", () => {
+    const slots = selected();
+    if (!slots.length) {
+      $("submitError").style.display = "block";
+      $("count").scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    const note = $("note").value.trim().replace(/\s*\n+\s*/g, "；");
+    // 第一行固定是「視訊時段」，LINE 自動回覆程式靠這個辨認並寫進試算表
+    const msg = "視訊時段：\n" + slots.join("\n") + (note ? `\n備註：${note}` : "");
+    window.open(`https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(msg)}`, "_blank");
+  });
+</script>
+</body>
+</html>
