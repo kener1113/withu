@@ -91,6 +91,21 @@
     <div class="section">
       <div class="section-title">長輩資訊</div>
       <div class="field">
+        <label>長輩性別<span class="req">*</span></label>
+        <div class="radio-group" data-group="elderGender" id="elderGender">
+          <span class="radio-chip" data-value="男性">男性</span>
+          <span class="radio-chip" data-value="女性">女性</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>希望陪送員的性別<span class="req">*</span></label>
+        <div class="radio-group" data-group="prefGender" id="prefGender">
+          <span class="radio-chip selected" data-value="不限">不限</span>
+          <span class="radio-chip" data-value="男性">男性</span>
+          <span class="radio-chip" data-value="女性">女性</span>
+        </div>
+      </div>
+      <div class="field">
         <label>行動能力</label>
         <div class="radio-group" data-group="mobility">
           <span class="radio-chip selected" data-value="可自行走動">可自行走動</span>
@@ -188,8 +203,15 @@
   // 不算空白的字數（中文、英數字都算一個字）
   const charCount = s => [...s.replace(/\s/g, "")].length;
 
+  // 選項群組取選到的值，輸入框取文字
+  const fieldValue = el => el.classList.contains("radio-group")
+    ? (el.querySelector(".selected")?.dataset.value || "")
+    : el.value.trim();
+
   // 必填欄位檢查：回傳錯誤訊息，沒問題回傳空字串（順序與頁面由上到下一致，才會捲到第一個錯誤）
   const RULES = [
+    ["elderGender", v => v ? "" : "請選擇長輩的性別"],
+    ["prefGender", v => v ? "" : "請選擇希望陪送員的性別"],
     ["emergencyPhone", v => {
       if (!v) return "請填寫緊急聯絡人電話";
       return v.replace(/\D/g, "").length < 8 ? "電話號碼好像不完整，請再確認一次" : "";
@@ -231,7 +253,7 @@
   function validate() {
     let first = null, count = 0;
     for (const [id, check] of RULES) {
-      const msg = check(document.getElementById(id).value.trim());
+      const msg = check(fieldValue(document.getElementById(id)));
       showError(id, msg);
       if (msg) { count++; if (!first) first = id; }
     }
@@ -249,8 +271,8 @@
   // 使用者修正後，即時拿掉該欄位的紅色提示
   RULES.forEach(([id, check]) => {
     const el = document.getElementById(id);
-    ["input", "change"].forEach(evt => el.addEventListener(evt, () => {
-      if (el.closest(".field").classList.contains("error")) showError(id, check(el.value.trim()));
+    ["input", "change", "click"].forEach(evt => el.addEventListener(evt, () => {
+      if (el.closest(".field").classList.contains("error")) showError(id, check(fieldValue(el)));
     }));
   });
 
@@ -276,6 +298,7 @@
       `刊登需求：${serviceType}\n` +
       `日期時間：${date} ${time}（約 ${duration}）\n` +
       `出發：${from}\n目的地：${to}\n` +
+      `長輩性別：${getSelected("elderGender")}，希望陪送員性別：${getSelected("prefGender")}\n` +
       `長輩行動能力：${mobility}，失智情形：${dementia}\n` +
       `緊急聯絡電話：${phone}` +
       (healthNote ? `\n健康狀況備註：${healthNote}` : "") +

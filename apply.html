@@ -84,6 +84,14 @@
         <label for="name">姓名<span class="req">*</span></label>
         <input type="text" id="name" placeholder="例如：林小明">
       </div>
+      <div class="field" id="f-gender">
+        <div class="label">性別<span class="req">*</span> <span class="hint">媒合時參考家屬的偏好</span></div>
+        <div class="chip-group" data-group="gender">
+          <span class="chip" data-value="男性">男性</span>
+          <span class="chip" data-value="女性">女性</span>
+          <span class="chip" data-value="不透露">不透露</span>
+        </div>
+      </div>
       <div class="field" id="f-school">
         <label for="school">學校<span class="req">*</span></label>
         <input type="text" id="school" placeholder="例如：國立政治大學">
@@ -105,6 +113,14 @@
           <span class="chip" data-value="週末上午">週末上午</span>
           <span class="chip" data-value="週末下午">週末下午</span>
           <span class="chip" data-value="週末晚上">週末晚上</span>
+        </div>
+      </div>
+      <div class="field" id="f-pref">
+        <div class="label">偏好服務的長輩性別<span class="req">*</span></div>
+        <div class="chip-group" data-group="pref">
+          <span class="chip" data-value="不限">不限</span>
+          <span class="chip" data-value="男性長輩">男性長輩</span>
+          <span class="chip" data-value="女性長輩">女性長輩</span>
         </div>
       </div>
       <div class="field" id="f-cert">
@@ -165,9 +181,11 @@
   // 檢查順序與頁面由上到下一致
   const RULES = [
     ["f-name", () => charCount($("name").value) >= 2 ? "" : "請填寫姓名"],
+    ["f-gender", () => selected("gender").length ? "" : "請選擇性別"],
     ["f-school", () => charCount($("school").value) >= 2 ? "" : "請填寫學校"],
     ["f-major", () => charCount($("major").value) >= 2 ? "" : "請填寫科系與年級"],
     ["f-slots", () => selected("slots").length ? "" : "請至少選擇一個可以服務的時段"],
+    ["f-pref", () => selected("pref").length ? "" : "請選擇偏好服務的長輩性別"],
     ["f-cert", () => selected("cert").length ? "" : "請選擇是否有急救證照"],
     ["f-lang", () => selected("lang").length ? "" : "請至少選擇一種語言"],
   ];
@@ -203,9 +221,11 @@
     const msg =
       "陪送員報名：\n" +
       `姓名：${oneLine($("name").value)}\n` +
+      `性別：${selected("gender")[0]}\n` +
       `學校：${oneLine($("school").value)}\n` +
       `科系年級：${oneLine($("major").value)}\n` +
       `可服務時段：${selected("slots").join("、")}\n` +
+      `偏好服務長輩：${selected("pref")[0]}\n` +
       `急救證照：${selected("cert")[0]}\n` +
       `語言：${selected("lang").join("、")}` +
       (exp ? `\n照顧經驗：${exp}` : "") +
