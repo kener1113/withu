@@ -185,6 +185,18 @@
   // ↓↓↓ 正式上線時，把這裡換成你申請到的官方帳號 ID（要保留開頭的 @）
   const LINE_OA_ID = "@370cwhmh";
 
+  // 從「瀏覽陪送員」按「預約這位陪送員」進來時，帶入指定的陪送員
+  const wanted = new URLSearchParams(location.search).get("companion");
+  if (wanted) {
+    const note = document.getElementById("otherNote");
+    if (!note.value) note.value = `希望由陪送員 ${wanted} 服務`;
+    const banner = document.createElement("div");
+    banner.className = "req-note";
+    banner.style.cssText = "background:#E1EDEB;color:#2F6F6A;border-radius:10px;padding:10px 12px;margin:0 0 16px;font-weight:600;";
+    banner.textContent = `您指定的陪送員：${wanted}（已填入「其他備註」，平台會優先安排）`;
+    document.getElementById("requestForm").before(banner);
+  }
+
   // 單選晶片的選取邏輯
   document.querySelectorAll(".radio-group").forEach(group => {
     group.querySelectorAll(".radio-chip").forEach(chip => {
