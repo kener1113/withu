@@ -61,13 +61,13 @@
 <div class="wrap">
   <a class="brand" href="index.html">← 伴程 WithU 官網</a>
   <h1>選擇視訊時段</h1>
-  <div class="lead">為了讓長輩安心，我們會安排陪送員、您和長輩三方視訊約 10 分鐘，先認識一下。<br>請勾選您<b>方便的時段</b>（建議至少選 2 個），我們確認陪送員的時間後，會再通知您確切的視訊時間。</div>
+  <div class="lead" id="lead">為了讓長輩安心，我們會安排陪送員、您和長輩三方視訊約 10 分鐘，先認識一下。<br>請勾選您<b>方便的時段</b>（建議至少選 2 個），我們確認陪送員的時間後，會再通知您確切的視訊時間。</div>
 
   <div class="count" id="count">已選 0 個時段</div>
   <div id="days"></div>
 
   <div class="section">
-    <label for="note">其他說明（選填）<span class="hint">例如：只能用 LINE 視訊、長輩晚上比較有精神</span></label>
+    <label for="note">其他說明（選填）<span class="hint" id="noteHint">例如：只能用 LINE 視訊、長輩晚上比較有精神</span></label>
     <textarea id="note"></textarea>
   </div>
 
@@ -82,6 +82,15 @@
   const SLOTS = ["上午 9–12 點", "下午 1–5 點", "晚上 6–9 點"];
   const DAYS_AHEAD = 7;
   const $ = id => document.getElementById(id);
+
+  // 陪送員接單後收到的連結：video-time.html?for=companion&id=W1022-24
+  const params = new URLSearchParams(location.search);
+  const bookingId = (params.get("id") || "").replace(/[^0-9A-Za-z-]/g, "");
+  const forCompanion = params.get("for") === "companion" && bookingId;
+  if (forCompanion) {
+    $("lead").innerHTML = `你接下的服務（${bookingId}）會先安排你、家屬和長輩三方視訊約 10 分鐘。<br>請勾選你<b>方便視訊的時段</b>（建議至少選 2 個），工作人員會對照家屬的時段，再通知你確切時間。`;
+    $("noteHint").textContent = "例如：週三晚上有課、只能用手機視訊";
+  }
 
   // 從明天開始列出 7 天，每天 3 個時段
   const today = new Date();
@@ -112,7 +121,7 @@
     }
     const note = $("note").value.trim().replace(/\s*\n+\s*/g, "；");
     // 第一行固定是「視訊時段」，LINE 自動回覆程式靠這個辨認並寫進試算表
-    const msg = "視訊時段：\n" + slots.join("\n") + (note ? `\n備註：${note}` : "");
+    const msg = (forCompanion ? `陪送員視訊時段 ${bookingId}：\n` : "視訊時段：\n") + slots.join("\n") + (note ? `\n備註：${note}` : "");
     window.open(`https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(msg)}`, "_blank");
   });
 </script>
