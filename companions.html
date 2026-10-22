@@ -178,7 +178,8 @@
     const badges = ready
       ? `<span class="badge">✓ 學生身分已驗證</span>${c.firstAid ? '<span class="badge">✓ 急救證照</span>' : ""}<span class="badge">✓ 失智友善培訓</span>`
       : (c.firstAid ? '<span class="badge pending">急救證照（待驗證）</span>' : "");
-    const book = "post-request.html?companion=" + encodeURIComponent(`${c.name}（${c.school}）`);
+    // 帶上陪送員代碼，平台才能準確找到這位陪送員（暱稱可能重複）
+    const book = "post-request.html?companion=" + encodeURIComponent(`${c.name}（${c.school}）`) + "&code=" + encodeURIComponent(c.code || "");
     // 試營運期間，還沒完成培訓的陪送員也開放預約，但要讓家屬先知道
     const button = (ready ? "" : '<div class="pending-note">⚠️ 尚未完成平台審核與培訓，預約後平台會先跟您確認</div>')
       + `<a class="book-btn" href="${book}">預約這位陪送員</a>`;

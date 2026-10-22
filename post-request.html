@@ -185,15 +185,15 @@
   // ↓↓↓ 正式上線時，把這裡換成你申請到的官方帳號 ID（要保留開頭的 @）
   const LINE_OA_ID = "@370cwhmh";
 
-  // 從「瀏覽陪送員」按「預約這位陪送員」進來時，帶入指定的陪送員
-  const wanted = new URLSearchParams(location.search).get("companion");
+  // 從「瀏覽陪送員」按「預約這位陪送員」進來時，帶入指定的陪送員（送出時會多一行「指定陪送員」）
+  const params = new URLSearchParams(location.search);
+  const wanted = params.get("companion");
+  const wantedCode = (params.get("code") || "").replace(/[^0-9A-Z]/g, "");
   if (wanted) {
-    const note = document.getElementById("otherNote");
-    if (!note.value) note.value = `希望由陪送員 ${wanted} 服務`;
     const banner = document.createElement("div");
     banner.className = "req-note";
     banner.style.cssText = "background:#E1EDEB;color:#2F6F6A;border-radius:10px;padding:10px 12px;margin:0 0 16px;font-weight:600;";
-    banner.textContent = `您指定的陪送員：${wanted}（已填入「其他備註」，平台會優先安排）`;
+    banner.textContent = `您指定的陪送員：${wanted}（送出後平台會直接詢問這位陪送員）`;
     document.getElementById("requestForm").before(banner);
   }
 
@@ -313,6 +313,7 @@
       `長輩性別：${getSelected("elderGender")}，希望陪送員性別：${getSelected("prefGender")}\n` +
       `長輩行動能力：${mobility}，失智情形：${dementia}\n` +
       `緊急聯絡電話：${phone}` +
+      (wanted ? `\n指定陪送員：${wanted}${wantedCode ? "#" + wantedCode : ""}` : "") +
       (healthNote ? `\n健康狀況備註：${healthNote}` : "") +
       (otherNote ? `\n其他備註：${otherNote}` : "");
 
