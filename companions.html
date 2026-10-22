@@ -85,7 +85,8 @@
   .tag.new { background: var(--teal-light); color: var(--teal); }
   .tag.pending { background: #FFF3D6; color: #8A6A10; }
   .badge.pending { background: #F4F1EC; color: var(--muted); }
-  .book-btn.disabled { background: #ECE6DC; color: var(--muted); pointer-events: none; }
+  .pending-note { margin-top: auto; font-size: 12px; color: #8A6A10; background: #FFF3D6; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; line-height: 1.5; }
+  .pending-note + .book-btn { margin-top: 0; }
   .badges { display:flex; gap:6px; flex-wrap: wrap; margin: 14px 0 10px; }
   .badge {
     background: var(--teal-light); color: var(--teal);
@@ -119,7 +120,7 @@
   <a class="brand" href="index.html">← 伴程 WithU 官網</a>
   <h1>瀏覽陪送員</h1>
   <div class="lead">以下是伴程 WithU 的大學生陪送員。想指定某位陪送員，按「預約這位陪送員」就能直接刊登需求；不確定的話，也可以交給平台幫您媒合。<br>
-  標示「審核中」「培訓中」的陪送員還在認證流程中，完成審核與培訓後才會開放預約。</div>
+  標示「審核中」「培訓中」的陪送員還在認證流程中，試營運期間也可以預約，平台會先跟您確認。</div>
   <div class="notice" id="demoNotice">試營運期間，部分陪送員為<b>示範資料</b>（標示「示範」），評價為內部測試結果。</div>
   <div class="filters">
     <label>語言 <select id="fLang"><option value="">全部</option></select></label>
@@ -178,9 +179,9 @@
       ? `<span class="badge">✓ 學生身分已驗證</span>${c.firstAid ? '<span class="badge">✓ 急救證照</span>' : ""}<span class="badge">✓ 失智友善培訓</span>`
       : (c.firstAid ? '<span class="badge pending">急救證照（待驗證）</span>' : "");
     const book = "post-request.html?companion=" + encodeURIComponent(`${c.name}（${c.school}）`);
-    const button = ready
-      ? `<a class="book-btn" href="${book}">預約這位陪送員</a>`
-      : `<span class="book-btn disabled">審核完成後開放預約</span>`;
+    // 試營運期間，還沒完成培訓的陪送員也開放預約，但要讓家屬先知道
+    const button = (ready ? "" : '<div class="pending-note">⚠️ 尚未完成平台審核與培訓，預約後平台會先跟您確認</div>')
+      + `<a class="book-btn" href="${book}">預約這位陪送員</a>`;
     return `<div class="card">
       <button class="heart ${fav ? "active" : ""}" data-key="${esc(keyOf(c))}" aria-label="收藏">${fav ? "♥" : "♡"}</button>
       <div class="top-row">
@@ -222,7 +223,7 @@
       ${items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<div class="section-empty">${emptyText}</div>`}
     </div>`;
     $("grid").innerHTML = list.length ? section("✅ 已完成培訓", "已通過平台審核與培訓，可以直接預約。", done, "目前沒有符合條件、已完成培訓的陪送員。")
-      + section("⏳ 培訓中／審核中", "還在面談或培訓中，資料為本人填寫；完成審核與培訓後就會開放預約。", pending, "目前沒有符合條件、培訓中的陪送員。") : "";
+      + section("⏳ 培訓中／審核中", "還在面談或培訓中，資料為本人填寫、尚未經平台驗證；試營運期間也可以預約，平台會先跟您確認。", pending, "目前沒有符合條件、培訓中的陪送員。") : "";
     $("state").hidden = list.length > 0;
     $("state").innerHTML = favOnly && !favs.length
       ? "還沒有收藏的陪送員，按卡片右上角的 ♡ 就能收藏。"
