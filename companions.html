@@ -77,6 +77,9 @@
   .tag.demo { background: #ECE6DC; color: var(--muted); }
   .tag.top { background: #FBE8DE; color: #8A4426; }
   .tag.new { background: var(--teal-light); color: var(--teal); }
+  .tag.pending { background: #FFF3D6; color: #8A6A10; }
+  .badge.pending { background: #F4F1EC; color: var(--muted); }
+  .book-btn.disabled { background: #ECE6DC; color: var(--muted); pointer-events: none; }
   .badges { display:flex; gap:6px; flex-wrap: wrap; margin: 14px 0 10px; }
   .badge {
     background: var(--teal-light); color: var(--teal);
@@ -109,7 +112,8 @@
 <div class="header">
   <a class="brand" href="index.html">← 伴程 WithU 官網</a>
   <h1>瀏覽陪送員</h1>
-  <div class="lead">以下是通過審核、完成培訓的大學生陪送員。想指定某位陪送員，按「預約這位陪送員」就能直接刊登需求；不確定的話，也可以交給平台幫您媒合。</div>
+  <div class="lead">以下是伴程 WithU 的大學生陪送員。想指定某位陪送員，按「預約這位陪送員」就能直接刊登需求；不確定的話，也可以交給平台幫您媒合。<br>
+  標示「審核中」「培訓中」的陪送員還在認證流程中，完成審核與培訓後才會開放預約。</div>
   <div class="notice" id="demoNotice">試營運期間，部分陪送員為<b>示範資料</b>（標示「示範」），評價為內部測試結果。</div>
   <div class="filters">
     <label>語言 <select id="fLang"><option value="">全部</option></select></label>
@@ -127,6 +131,7 @@
 
 <div class="footer-note">
   為保護陪送員隱私，網站只顯示暱稱與學校；完整資料會在媒合後由平台提供。<br>
+  「審核中」「培訓中」的陪送員資料為本人填寫，尚未經平台驗證。<br>
   評分為家屬在每次服務後，依守時、態度、完成度三項指標給的 1–5 分。
 </div>
 
@@ -154,27 +159,33 @@
     return `<span>${label}</span><div class="bar"><i style="width:${(v / 5) * 100}%"></i></div><span>${v.toFixed(1)}</span>`;
   }
 
+  const STAGE_TAG = { training: "培訓中", reviewing: "審核中" };
+
   function card(c) {
     const fav = favs.includes(keyOf(c));
+    const ready = c.stage === "accepted";
     const ratingHtml = c.rating
       ? `<div class="rating">⭐ <b>${c.rating.toFixed(1)}</b>（${c.served} 次服務）</div>`
-      : `<div class="rating"><span class="tag new" style="margin-left:0">新加入的陪送員</span></div>`;
+      : ready ? `<div class="rating"><span class="tag new" style="margin-left:0">新加入的陪送員</span></div>` : "";
+    // 還沒錄取的人：學生身分與培訓尚未完成，不能顯示成已認證；急救證照是本人填寫，標示待驗證
+    const badges = ready
+      ? `<span class="badge">✓ 學生身分已驗證</span>${c.firstAid ? '<span class="badge">✓ 急救證照</span>' : ""}<span class="badge">✓ 失智友善培訓</span>`
+      : (c.firstAid ? '<span class="badge pending">急救證照（待驗證）</span>' : "");
     const book = "post-request.html?companion=" + encodeURIComponent(`${c.name}（${c.school}）`);
+    const button = ready
+      ? `<a class="book-btn" href="${book}">預約這位陪送員</a>`
+      : `<span class="book-btn disabled">審核完成後開放預約</span>`;
     return `<div class="card">
       <button class="heart ${fav ? "active" : ""}" data-key="${esc(keyOf(c))}" aria-label="收藏">${fav ? "♥" : "♡"}</button>
       <div class="top-row">
         <div class="avatar">${esc(Array.from(c.name)[0] || "?")}</div>
         <div>
-          <div class="name">${esc(c.name)}${c.top ? '<span class="tag top">🌟 優質陪送員</span>' : ""}${c.demo ? '<span class="tag demo">示範</span>' : ""}</div>
+          <div class="name">${esc(c.name)}${c.top ? '<span class="tag top">🌟 優質陪送員</span>' : ""}${STAGE_TAG[c.stage] ? `<span class="tag pending">${STAGE_TAG[c.stage]}</span>` : ""}${c.demo ? '<span class="tag demo">示範</span>' : ""}</div>
           <div class="school">${esc(c.school)}</div>
           ${ratingHtml}
         </div>
       </div>
-      <div class="badges">
-        <span class="badge">✓ 學生身分已驗證</span>
-        ${c.firstAid ? '<span class="badge">✓ 急救證照</span>' : ""}
-        <span class="badge">✓ 失智友善培訓</span>
-      </div>
+      ${badges ? `<div class="badges">${badges}</div>` : '<div style="height:12px"></div>'}
       <div class="info">
         <span>語言：</span>${esc(c.languages.join("、") || "—")}<br>
         <span>可服務時段：</span>${esc(c.slots.join("、") || "—")}<br>
@@ -182,7 +193,7 @@
       </div>
       ${c.rating ? `<div class="scores">${scoreRow("守時", c.scores.punctual)}${scoreRow("態度", c.scores.attitude)}${scoreRow("完成度", c.scores.completion)}</div>` : ""}
       ${c.review ? `<div class="review">💬 家屬評論：「${esc(c.review)}」</div>` : ""}
-      <a class="book-btn" href="${book}">預約這位陪送員</a>
+      ${button}
     </div>`;
   }
 
@@ -193,9 +204,10 @@
       .filter(c => !slot || c.slots.includes(slot))
       .filter(c => !gender || c.gender === gender)
       .filter(c => !favOnly || favs.includes(keyOf(c)))
-      // 優質陪送員優先，其次依評分高低（高分者優先曝光）
-      .sort((a, b) => (b.top - a.top) || (b.rating - a.rating) || (b.served - a.served));
-    $("count").textContent = `共 ${list.length} 位陪送員`;
+      // 已錄取的排前面；其中優質陪送員優先，再依評分高低（高分者優先曝光）
+      .sort((a, b) => ((b.stage === "accepted") - (a.stage === "accepted")) || (b.top - a.top) || (b.rating - a.rating) || (b.served - a.served));
+    const ready = list.filter(c => c.stage === "accepted").length;
+    $("count").textContent = `共 ${list.length} 位陪送員（可預約 ${ready} 位，審核／培訓中 ${list.length - ready} 位）`;
     $("grid").innerHTML = list.map(card).join("");
     $("state").hidden = list.length > 0;
     $("state").innerHTML = favOnly && !favs.length
