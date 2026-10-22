@@ -83,12 +83,13 @@
   const DAYS_AHEAD = 7;
   const $ = id => document.getElementById(id);
 
-  // 陪送員接單後收到的連結：video-time.html?for=companion&id=W1022-24
+  // 陪送員接單後收到的連結：video-time.html?for=companion（短網址），或另外帶 &id=W1022-24
+  // 沒帶編號時，LINE 程式會用陪送員的帳號找出他接下的那筆服務
   const params = new URLSearchParams(location.search);
   const bookingId = (params.get("id") || "").replace(/[^0-9A-Za-z-]/g, "");
-  const forCompanion = params.get("for") === "companion" && bookingId;
+  const forCompanion = params.get("for") === "companion";
   if (forCompanion) {
-    $("lead").innerHTML = `你接下的服務（${bookingId}）會先安排你、家屬和長輩三方視訊約 10 分鐘。<br>請勾選你<b>方便視訊的時段</b>（建議至少選 2 個），工作人員會對照家屬的時段，再通知你確切時間。`;
+    $("lead").innerHTML = `你接下的服務${bookingId ? `（${bookingId}）` : ""}會先安排你、家屬和長輩三方視訊約 10 分鐘。<br>請勾選你<b>方便視訊的時段</b>（建議至少選 2 個），工作人員會對照家屬的時段，再通知你確切時間。`;
     $("noteHint").textContent = "例如：週三晚上有課、只能用手機視訊";
   }
 
@@ -121,7 +122,7 @@
     }
     const note = $("note").value.trim().replace(/\s*\n+\s*/g, "；");
     // 第一行固定是「視訊時段」，LINE 自動回覆程式靠這個辨認並寫進試算表
-    const msg = (forCompanion ? `陪送員視訊時段 ${bookingId}：\n` : "視訊時段：\n") + slots.join("\n") + (note ? `\n備註：${note}` : "");
+    const msg = (forCompanion ? `陪送員視訊時段${bookingId ? " " + bookingId : ""}：\n` : "視訊時段：\n") + slots.join("\n") + (note ? `\n備註：${note}` : "");
     window.open(`https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(msg)}`, "_blank");
   });
 </script>
