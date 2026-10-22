@@ -48,6 +48,12 @@
     max-width: 900px;
     margin: 0 auto;
   }
+  .section { max-width: 900px; margin: 0 auto 30px; }
+  .section-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+  .section-head h2 { font-size: 19px; color: var(--dark); }
+  .section-head .num { font-size: 13px; color: var(--muted); }
+  .section-desc { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+  .section-empty { font-size: 14px; color: var(--muted); background: #fff; border-radius: 12px; padding: 16px; text-align: center; }
   .card {
     background: #fff; border-radius: 14px; padding: 20px;
     box-shadow: 0 2px 10px rgba(60,40,30,0.06);
@@ -124,8 +130,8 @@
   <div class="count" id="count"></div>
 </div>
 
-<div class="grid" id="grid">
-  <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+<div id="grid">
+  <div class="grid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
 </div>
 <div class="state" id="state" hidden></div>
 
@@ -206,9 +212,17 @@
       .filter(c => !favOnly || favs.includes(keyOf(c)))
       // 已錄取的排前面；其中優質陪送員優先，再依評分高低（高分者優先曝光）
       .sort((a, b) => ((b.stage === "accepted") - (a.stage === "accepted")) || (b.top - a.top) || (b.rating - a.rating) || (b.served - a.served));
-    const ready = list.filter(c => c.stage === "accepted").length;
-    $("count").textContent = `共 ${list.length} 位陪送員（可預約 ${ready} 位，審核／培訓中 ${list.length - ready} 位）`;
-    $("grid").innerHTML = list.map(card).join("");
+    // 分成兩類：已完成培訓（可預約）／培訓中與審核中（尚未開放預約）
+    const done = list.filter(c => c.stage === "accepted");
+    const pending = list.filter(c => c.stage !== "accepted");
+    $("count").textContent = `共 ${list.length} 位陪送員`;
+    const section = (title, desc, items, emptyText) => `<div class="section">
+      <div class="section-head"><h2>${title}</h2><span class="num">${items.length} 位</span></div>
+      <div class="section-desc">${desc}</div>
+      ${items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<div class="section-empty">${emptyText}</div>`}
+    </div>`;
+    $("grid").innerHTML = list.length ? section("✅ 已完成培訓", "已通過平台審核與培訓，可以直接預約。", done, "目前沒有符合條件、已完成培訓的陪送員。")
+      + section("⏳ 培訓中／審核中", "還在面談或培訓中，資料為本人填寫；完成審核與培訓後就會開放預約。", pending, "目前沒有符合條件、培訓中的陪送員。") : "";
     $("state").hidden = list.length > 0;
     $("state").innerHTML = favOnly && !favs.length
       ? "還沒有收藏的陪送員，按卡片右上角的 ♡ 就能收藏。"
