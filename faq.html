@@ -21,26 +21,26 @@
     background: var(--cream);
     color: var(--dark);
     padding: 32px 16px 48px;
-    font-size: 17px;
+    font-size: calc(17px * var(--fs, 1));
     line-height: 1.7;
   }
   .wrap { max-width: 760px; margin: 0 auto; }
-  .brand { font-size: 14px; font-weight: 700; color: var(--teal); letter-spacing: 1px; }
-  h1 { font-size: 28px; margin-top: 6px; }
-  .intro { color: var(--muted); font-size: 16px; margin-top: 4px; }
+  .brand { font-size: calc(14px * var(--fs, 1)); font-weight: 700; color: var(--teal); letter-spacing: 1px; }
+  h1 { font-size: calc(28px * var(--fs, 1)); margin-top: 6px; }
+  .intro { color: var(--muted); font-size: calc(16px * var(--fs, 1)); margin-top: 4px; }
 
   .search {
     width: 100%; margin: 20px 0 14px;
     border: 1px solid var(--border); border-radius: 12px;
     background: #fff; padding: 14px 16px;
-    font-size: 17px; font-family: inherit; color: var(--dark);
+    font-size: calc(17px * var(--fs, 1)); font-family: inherit; color: var(--dark);
   }
   .search:focus { outline: 2px solid var(--teal); border-color: transparent; }
 
   .chips { display:flex; gap:10px; flex-wrap: wrap; margin-bottom: 24px; }
   .chip {
     background: #fff; border: 1px solid var(--border); border-radius: 20px;
-    padding: 8px 16px; font-size: 15px; color: var(--muted);
+    padding: 8px 16px; font-size: calc(15px * var(--fs, 1)); color: var(--muted);
     cursor: pointer; font-family: inherit;
   }
   .chip.active { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
@@ -48,7 +48,7 @@
   .group { margin-bottom: 28px; }
   .group-title {
     display:flex; align-items:center; gap:10px;
-    font-size: 18px; font-weight: 700; margin-bottom: 12px;
+    font-size: calc(18px * var(--fs, 1)); font-weight: 700; margin-bottom: 12px;
   }
   .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); }
 
@@ -60,25 +60,25 @@
   summary {
     list-style: none; cursor: pointer;
     display:flex; align-items:center; gap:14px;
-    padding: 18px 20px; font-weight: 600; font-size: 18px;
+    padding: 18px 20px; font-weight: 600; font-size: calc(18px * var(--fs, 1));
   }
   summary::-webkit-details-marker { display: none; }
   .q {
     flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
     background: var(--teal-light); color: var(--teal);
     display:flex; align-items:center; justify-content:center;
-    font-size: 15px; font-weight: 700;
+    font-size: calc(15px * var(--fs, 1)); font-weight: 700;
   }
   .q-text { flex: 1; }
   .toggle {
     flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
     background: var(--orange-light); color: var(--orange);
     display:flex; align-items:center; justify-content:center;
-    font-size: 20px; font-weight: 700; transition: transform .2s;
+    font-size: calc(20px * var(--fs, 1)); font-weight: 700; transition: transform .2s;
   }
   details[open] .toggle { transform: rotate(45deg); }
   .answer {
-    padding: 0 20px 20px 66px; color: #444; font-size: 17px;
+    padding: 0 20px 20px 66px; color: #444; font-size: calc(17px * var(--fs, 1));
   }
   .answer b { color: var(--teal); }
 
@@ -88,17 +88,18 @@
     background: var(--teal); color: #fff; border-radius: 20px;
     padding: 28px 24px; text-align: center; margin-top: 12px;
   }
-  .contact h2 { font-size: 22px; }
-  .contact p { color: #C4DEDA; font-size: 16px; margin: 6px 0 18px; }
+  .contact h2 { font-size: calc(22px * var(--fs, 1)); }
+  .contact p { color: #C4DEDA; font-size: calc(16px * var(--fs, 1)); margin: 6px 0 18px; }
   .contact-btn {
     background: var(--orange); color: var(--dark);
     border: none; border-radius: 12px; padding: 14px 28px;
-    font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit;
+    font-size: calc(17px * var(--fs, 1)); font-weight: 700; cursor: pointer; font-family: inherit;
   }
   .contact-btn:hover { background: #F09A72; }
   a.brand { display: inline-block; text-decoration: none; }
   a.brand:hover { text-decoration: underline; }
 </style>
+<script src="fontsize.js"></script>
 </head>
 <body>
 <div class="wrap">
