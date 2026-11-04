@@ -40,6 +40,10 @@
     font-size: calc(14px * var(--fs, 1)); font-family: inherit; color: var(--dark); background: #fff;
   }
   textarea { resize: vertical; min-height: 60px; }
+  .addr-row { display:flex; gap: 8px; margin-bottom: 8px; }
+  .addr-row select { flex: 1; min-width: 0; }
+  select:disabled { background: #F5F2EC; color: var(--muted); }
+  #fromOther { margin-bottom: 8px; }
   .radio-group { display:flex; gap: 10px; flex-wrap: wrap; }
   .radio-chip {
     border: 1px solid #ECE6DC; border-radius: 20px; padding: 7px 14px;
@@ -160,8 +164,20 @@
         </div>
       </div>
       <div class="field">
-        <label>出發地點（到府接送地址）<span class="req">*</span></label>
-        <input type="text" id="fromAddr" placeholder="例如：文山區○○路○○號">
+        <label for="fromCity">出發地點（到府接送地址）<span class="req">*</span></label>
+        <div class="addr-row">
+          <select id="fromCity" aria-label="縣市">
+            <option value="">選擇縣市</option>
+            <option value="臺北市">臺北市</option>
+            <option value="新北市">新北市</option>
+            <option value="其他">其他縣市</option>
+          </select>
+          <select id="fromDist" aria-label="行政區" disabled>
+            <option value="">選擇行政區</option>
+          </select>
+        </div>
+        <input type="text" id="fromOther" aria-label="縣市與鄉鎮市區" placeholder="縣市與鄉鎮市區，例如：桃園市中壢區" hidden>
+        <input type="text" id="fromAddr" aria-label="詳細地址" placeholder="路名、巷弄、門牌號碼，例如：指南路二段64號">
       </div>
       <div class="field">
         <label>目的地名稱與地址<span class="req">*</span></label>
@@ -213,6 +229,29 @@
     return group.querySelector(".selected").dataset.value;
   }
 
+  // 出發地點：縣市 → 行政區用選單，詳細地址自己打；其他縣市改成自己輸入縣市與區
+  const DISTRICTS = {
+    "臺北市": ["中正區", "大同區", "中山區", "松山區", "大安區", "萬華區", "信義區", "士林區", "北投區", "內湖區", "南港區", "文山區"],
+    "新北市": ["板橋區", "三重區", "中和區", "永和區", "新莊區", "新店區", "樹林區", "鶯歌區", "三峽區", "淡水區",
+             "汐止區", "瑞芳區", "土城區", "蘆洲區", "五股區", "泰山區", "林口區", "深坑區", "石碇區", "坪林區",
+             "三芝區", "石門區", "八里區", "平溪區", "雙溪區", "貢寮區", "金山區", "萬里區", "烏來區"],
+  };
+  const fromCity = document.getElementById("fromCity");
+  const fromDist = document.getElementById("fromDist");
+  const fromOther = document.getElementById("fromOther");
+  fromCity.addEventListener("change", () => {
+    const list = DISTRICTS[fromCity.value] || [];
+    fromDist.innerHTML = '<option value="">選擇行政區</option>' + list.map(d => `<option value="${d}">${d}</option>`).join("");
+    fromDist.disabled = !list.length;
+    fromDist.hidden = fromCity.value === "其他";
+    fromOther.hidden = fromCity.value !== "其他";
+  });
+  const fullFromAddr = () => {
+    const detail = document.getElementById("fromAddr").value.trim();
+    const area = fromCity.value === "其他" ? fromOther.value.trim() : fromCity.value + fromDist.value;
+    return (area + detail).trim();
+  };
+
   // 不算空白的字數（中文、英數字都算一個字）
   const charCount = s => [...s.replace(/\s/g, "")].length;
 
@@ -243,9 +282,11 @@
       const nowTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       return document.getElementById("serviceDate").value === today && v < nowTime ? "這個時間已經過了，請選擇之後的時間" : "";
     }],
-    ["fromAddr", v => {
-      if (!v) return "請填寫出發地點（到府接送的地址）";
-      return charCount(v) < 5 ? "請填寫完整的地址（包含路名與門牌號碼）" : "";
+    ["fromCity", () => {
+      if (!fromCity.value) return "請選擇出發地點的縣市";
+      if (fromCity.value === "其他" && charCount(fromOther.value) < 3) return "請填寫縣市與鄉鎮市區（例如：桃園市中壢區）";
+      if (fromCity.value !== "其他" && !fromDist.value) return "請選擇行政區";
+      return charCount(document.getElementById("fromAddr").value) < 3 ? "請填寫路名與門牌號碼（例如：指南路二段64號）" : "";
     }],
     // 目的地只要求 4 個字，「萬芳醫院」「台大醫院」這類名稱才不會被擋
     ["toAddr", v => {
@@ -289,6 +330,12 @@
     }));
   });
 
+  // 出發地點分成好幾格，任何一格改了都重新檢查
+  ["fromDist", "fromOther", "fromAddr"].forEach(id => ["input", "change"].forEach(evt =>
+    document.getElementById(id).addEventListener(evt, () => {
+      if (fromCity.closest(".field").classList.contains("error")) showError("fromCity", RULES[RULES.findIndex(r => r[0] === "fromCity")][1]());
+    })));
+
   document.getElementById("requestForm").addEventListener("submit", function (e) {
     e.preventDefault();
     if (!validate()) return;
@@ -299,7 +346,7 @@
     const duration = getSelected("duration");
     const date = document.getElementById("serviceDate").value || "未填";
     const time = document.getElementById("serviceTime").value || "未填";
-    const from = document.getElementById("fromAddr").value || "未填";
+    const from = fullFromAddr() || "未填";
     const to = document.getElementById("toAddr").value || "未填";
     const phone = document.getElementById("emergencyPhone").value || "未填";
     // 備註可能有換行，壓成一行才不會打亂摘要格式
