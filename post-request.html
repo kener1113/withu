@@ -44,6 +44,7 @@
   .addr-row select { flex: 1; min-width: 0; }
   select:disabled { background: #F5F2EC; color: var(--muted); }
   #fromOther { margin-bottom: 8px; }
+  .other-input { margin-top: 10px; }
   .radio-group { display:flex; gap: 10px; flex-wrap: wrap; }
   .radio-chip {
     border: 1px solid #ECE6DC; border-radius: 20px; padding: 7px 14px;
@@ -147,6 +148,7 @@
           <span class="radio-chip" data-value="買東西">買東西</span>
           <span class="radio-chip" data-value="其他">其他</span>
         </div>
+        <input type="text" id="serviceOther" class="other-input" maxlength="30" aria-label="其他服務內容" placeholder="請輸入服務內容，例如：陪同復健" hidden>
       </div>
       <div class="field">
         <label>服務日期<span class="req">*</span></label>
@@ -220,9 +222,19 @@
       chip.addEventListener("click", () => {
         group.querySelectorAll(".radio-chip").forEach(c => c.classList.remove("selected"));
         chip.classList.add("selected");
+        if (group.dataset.group === "serviceType") syncServiceOther();
       });
     });
   });
+
+  // 服務類型選「其他」時，讓使用者自己輸入
+  function syncServiceOther() {
+    const box = document.getElementById("serviceOther");
+    const isOther = getSelected("serviceType") === "其他";
+    box.hidden = !isOther;
+    if (isOther) box.focus();
+    else showError("serviceOther", "");
+  }
 
   function getSelected(groupName) {
     const group = document.querySelector(`.radio-group[data-group="${groupName}"]`);
@@ -268,6 +280,7 @@
       if (!v) return "請填寫緊急聯絡人電話";
       return v.replace(/\D/g, "").length < 8 ? "電話號碼好像不完整，請再確認一次" : "";
     }],
+    ["serviceOther", v => getSelected("serviceType") !== "其他" || charCount(v) >= 2 ? "" : "請輸入其他服務內容（例如：陪同復健）"],
     ["serviceDate", v => {
       if (!v) return "請選擇服務日期";
       const today = new Date();
@@ -342,7 +355,9 @@
 
     const mobility = getSelected("mobility");
     const dementia = getSelected("dementia");
-    const serviceType = getSelected("serviceType");
+    const serviceType = getSelected("serviceType") === "其他"
+      ? document.getElementById("serviceOther").value.trim().replace(/\s+/g, " ")
+      : getSelected("serviceType");
     const duration = getSelected("duration");
     const date = document.getElementById("serviceDate").value || "未填";
     const time = document.getElementById("serviceTime").value || "未填";

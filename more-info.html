@@ -44,6 +44,7 @@
     font-size: calc(14px * var(--fs, 1)); cursor: pointer; color: var(--muted); background: #fff;
     user-select: none;
   }
+  .other-input { margin-top: 10px; }
   .chip.selected { background: var(--teal); color: #fff; border-color: var(--teal); }
   .check { display:flex; align-items:center; gap: 8px; margin-top: 10px; font-size: calc(14px * var(--fs, 1)); color: var(--dark); cursor: pointer; }
   .check input { width: 18px; height: 18px; accent-color: var(--teal); }
@@ -104,6 +105,7 @@
           <span class="chip" data-value="客語">客語</span>
           <span class="chip" data-value="其他">其他</span>
         </div>
+        <input type="text" id="langOther" class="other-input" maxlength="30" aria-label="其他語言" placeholder="請輸入其他語言，例如：越南語、粵語" hidden>
       </div>
 
       <div class="field" id="f-habit">
@@ -136,6 +138,10 @@
         group.querySelectorAll(".chip").forEach(c => c.classList.remove("selected"));
         chip.classList.add("selected");
       }
+      if (group.dataset.group === "lang") {
+        $("langOther").hidden = !chip.parentNode.querySelector('[data-value="其他"]').classList.contains("selected");
+        if (chip.dataset.value === "其他" && !$("langOther").hidden) $("langOther").focus();
+      }
       onChange();
     }));
   });
@@ -158,7 +164,10 @@
     ["f-register", () => selected("register").length ? "" : "請選擇是否已經掛號"],
     ["f-dept", () => notClinic() || charCount($("dept").value) >= 2 ? "" : "請填寫看診科別"],
     ["f-name", () => charCount($("elderName").value) >= 2 ? "" : "請填寫長輩的稱呼（例如：陳奶奶）"],
-    ["f-lang", () => selected("lang").length ? "" : "請至少選擇一種語言"],
+    ["f-lang", () => {
+      if (!selected("lang").length) return "請至少選擇一種語言";
+      return selected("lang").includes("其他") && charCount($("langOther").value) < 1 ? "請輸入其他語言（例如：越南語）" : "";
+    }],
     ["f-habit", () => $("noHabit").checked || charCount($("habit").value) >= 2 ? "" : "請填寫需要注意的習慣，或勾選「沒有特別需要注意的」"],
   ];
 
@@ -189,7 +198,7 @@
     syncDept();
     for (const [id, check] of RULES) if ($(id).classList.contains("error")) showError(id, check());
   }
-  ["dept", "elderName", "habit"].forEach(id => $(id).addEventListener("input", onChange));
+  ["dept", "elderName", "habit", "langOther"].forEach(id => $(id).addEventListener("input", onChange));
 
   const oneLine = s => s.trim().replace(/\s*\n+\s*/g, "；");
 
@@ -202,7 +211,7 @@
       `掛號：${selected("register")[0]}\n` +
       `科別：${notClinic() ? "不需要" : oneLine($("dept").value)}\n` +
       `稱呼：${oneLine($("elderName").value)}\n` +
-      `語言：${selected("lang").join("、")}\n` +
+      `語言：${selected("lang").map(l => l === "其他" ? oneLine($("langOther").value).replace(/\s*[,，、/／]+\s*/g, "、").replace(/^、|、$/g, "") : l).join("、")}\n` +
       `注意事項：${$("noHabit").checked ? "沒有特別需要注意的" : oneLine($("habit").value)}`;
     window.open(`https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(summary)}`, "_blank");
   });

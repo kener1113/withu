@@ -47,6 +47,7 @@
     border: 1px solid #ECE6DC; border-radius: 20px; padding: 8px 14px;
     font-size: calc(14px * var(--fs, 1)); cursor: pointer; color: var(--muted); background: #fff; user-select: none;
   }
+  .other-input { margin-top: 10px; }
   .chip.selected { background: var(--teal); color: #fff; border-color: var(--teal); }
   .req { color: #C0502A; margin-left: 2px; }
   .field.error input[type=text], .field.error textarea { border-color: #C0502A; background: #FFF6F2; }
@@ -140,6 +141,7 @@
           <span class="chip" data-value="英語">英語</span>
           <span class="chip" data-value="其他">其他</span>
         </div>
+        <input type="text" id="langOther" class="other-input" maxlength="30" aria-label="其他語言" placeholder="請輸入其他語言，例如：越南語、粵語" hidden>
       </div>
       <div class="field">
         <label for="exp">照顧或陪伴長輩的經驗（選填）<span class="hint">例如：常陪阿嬤看診、做過志工</span></label>
@@ -175,6 +177,10 @@
         group.querySelectorAll(".chip").forEach(c => c.classList.remove("selected"));
         chip.classList.add("selected");
       }
+      if (group.dataset.group === "lang") {
+        $("langOther").hidden = !chip.parentNode.querySelector('[data-value="其他"]').classList.contains("selected");
+        if (chip.dataset.value === "其他" && !$("langOther").hidden) $("langOther").focus();
+      }
       onChange();
     }));
   });
@@ -189,7 +195,10 @@
     ["f-slots", () => selected("slots").length ? "" : "請至少選擇一個可以服務的時段"],
     ["f-pref", () => selected("pref").length ? "" : "請選擇偏好服務的長輩性別"],
     ["f-cert", () => selected("cert").length ? "" : "請選擇是否有急救證照"],
-    ["f-lang", () => selected("lang").length ? "" : "請至少選擇一種語言"],
+    ["f-lang", () => {
+      if (!selected("lang").length) return "請至少選擇一種語言";
+      return selected("lang").includes("其他") && charCount($("langOther").value) < 1 ? "請輸入其他語言（例如：越南語）" : "";
+    }],
   ];
 
   function showError(fieldId, msg) {
@@ -213,7 +222,7 @@
     return count === 0;
   }
   function onChange() { for (const [id, check] of RULES) if ($(id).classList.contains("error")) showError(id, check()); }
-  ["name", "school", "major"].forEach(id => $(id).addEventListener("input", onChange));
+  ["name", "school", "major", "langOther"].forEach(id => $(id).addEventListener("input", onChange));
 
   $("applyForm").addEventListener("submit", e => {
     e.preventDefault();
@@ -229,7 +238,7 @@
       `可服務時段：${selected("slots").join("、")}\n` +
       `偏好服務長輩：${selected("pref")[0]}\n` +
       `急救證照：${selected("cert")[0]}\n` +
-      `語言：${selected("lang").join("、")}` +
+      `語言：${selected("lang").map(l => l === "其他" ? oneLine($("langOther").value).replace(/\s*[,，、/／]+\s*/g, "、").replace(/^、|、$/g, "") : l).join("、")}` +
       (exp ? `\n照顧經驗：${exp}` : "") +
       (why ? `\n加入原因：${why}` : "");
     window.open(`https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(msg)}`, "_blank");
